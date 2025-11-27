@@ -5,7 +5,7 @@ function CardProduct(props) {
     const { children } = props;
 
     return(
-        <div className="w-full max-w-sm bg-gray-800 border border-gray-700 rounded-lg shadow flex flex-col align-middle">
+        <div className="w-full mx-2 max-w-sm bg-gray-800 border border-gray-700 rounded-lg shadow flex flex-col justify-between">
             {children}
         </div>
     );
@@ -24,10 +24,10 @@ function Header(props){
 
 function Body(props) {
 
-    const {children, title} = props;
+    const {children, title, key} = props;
 
     return (
-        <div className="px-5 pb-5">
+        <div className="px-5 pb-5 h-full" key={key}>
             <a href="">
                 <h5 className="text-xl font-semibold tracking-tight text-white">{title}</h5>
                 <p className="text-m text-white">{children}</p>
