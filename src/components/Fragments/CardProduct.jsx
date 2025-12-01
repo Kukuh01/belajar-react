@@ -5,7 +5,7 @@ function CardProduct(props) {
     const { children } = props;
 
     return(
-        <div className="w-full mx-2 max-w-sm bg-gray-800 border border-gray-700 rounded-lg shadow flex flex-col justify-between">
+        <div className="w-full mx-3 my-2 max-w-xs bg-gray-800 border border-gray-700 rounded-lg shadow flex flex-col justify-between">
             {children}
         </div>
     );
@@ -38,12 +38,12 @@ function Body(props) {
 
 function Footer(props){
 
-    const {price} = props;
+    const {price, handleAddToCart, id} = props;
 
     return (
         <div className="flex items-center justify-between px-5 pb-5">
-            <span className="text-xl font-bold text-white">Rp. {price}</span>
-            <Button variant="bg-blue-600" text="Add To Cart"/>
+            <span className="text-xl font-bold text-white">Rp{" "} {price.toLocaleString('id-ID',{styles: 'currency', currency: 'IDR'})}</span>
+            <Button variant="bg-blue-600" text="Add To Cart" onClick={() => handleAddToCart(id)}/>
         </div>
     );
 }
