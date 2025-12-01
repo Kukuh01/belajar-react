@@ -1,35 +1,36 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import Button from "../components/Elements/Button/Button";
 import CardProduct from "../components/Fragments/CardProduct";
+import { getProducts } from "../services/product.service";
 
 /**
  * DATA PRODUK (static)
  * List produk yang akan dirender pada halaman.
  * Masing-masing produk memiliki id, nama, harga, gambar, dan deskripsi.
  */
-const products = [
-    {
-        id: 1,
-        name: "Sepatu Baru",
-        price: 1000000,
-        image: "/images/vivobook.jpeg",
-        description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
-    },
-    {
-        id: 2,
-        name: "Sepatu Baru 2",
-        price: 1000000,
-        image: "/images/vivobook.jpeg",
-        description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
-    },
-    {
-        id: 3,
-        name: "Sepatu Baru 3",
-        price: 1000000,
-        image: "/images/vivobook.jpeg",
-        description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
-    },
-];
+// const products = [
+//     {
+//         id: 1,
+//         name: "Sepatu Baru",
+//         price: 1000000,
+//         image: "/images/vivobook.jpeg",
+//         description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
+//     },
+//     {
+//         id: 2,
+//         name: "Sepatu Baru 2",
+//         price: 1000000,
+//         image: "/images/vivobook.jpeg",
+//         description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
+//     },
+//     {
+//         id: 3,
+//         name: "Sepatu Baru 3",
+//         price: 1000000,
+//         image: "/images/vivobook.jpeg",
+//         description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
+//     },
+// ];
 
 /**
  * Mengambil email user dari localStorage
@@ -55,6 +56,14 @@ function ProductsPage() {
      */
     const [totalPrice, setTotalPrice] = useState(0);
 
+    const [products, setProducts] = useState([]);
+
+
+    useEffect(function(){
+        getProducts(function(data){
+            setProducts(data)
+        });
+    }, []);
 
     /**
      * USE EFFECT 1 – Component Did Mount
@@ -78,7 +87,7 @@ function ProductsPage() {
      * 2. Menyimpan cart terbaru ke localStorage agar cart tidak hilang saat refresh.
      */
     useEffect(function () {
-        if (cart.length > 0) {
+        if (products.length > 0 && cart.length > 0) {
 
             // Hitung total harga dengan reduce
             const sum = cart.reduce(function (acc, item) {
@@ -97,7 +106,7 @@ function ProductsPage() {
             localStorage.setItem("cart", JSON.stringify(cart));
         }
 
-    }, [cart]); // hanya berjalan jika cart berubah
+    }, [cart, products]); // hanya berjalan jika cart berubah
 
 
     /**
@@ -188,11 +197,11 @@ function ProductsPage() {
 
                 {/* LIST PRODUK */}
                 <div className="w-4/6 flex flex-wrap">
-                    {products.map((product) => (
+                    {products.length > 0 && products.map((product) => (
 
                         <CardProduct key={product.id}>
                             <CardProduct.Header image={product.image} />
-                            <CardProduct.Body title={product.name}>
+                            <CardProduct.Body title={product.title}>
                                 {product.description}
                             </CardProduct.Body>
                             <CardProduct.Footer
@@ -220,25 +229,24 @@ function ProductsPage() {
                         </thead>
 
                         <tbody>
-                            {cart.map((item) => {
+                            {products.length > 0 && cart.map((item) => {
 
                                 // Cari data product berdasarkan id item
                                 const product = products.find((product) => product.id === item.id);
 
                                 return (
                                     <tr key={item.id}>
-                                        <td>{product.name}</td>
-                                        <td>{product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                                        <td>{product.title}</td>
+                                        <td>{product.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                                         <td>{item.qty}</td>
-                                        <td>{(item.qty * product.price).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                                        <td>{(item.qty * product.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                                     </tr>
                                 );
                             })}
-
                             <tr ref={totalPriceRef}>
                                 <td colSpan={3}><b>Total Price</b></td>
                                 <td>
-                                    <b>{totalPrice.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</b>
+                                    <b>{totalPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</b>
                                 </td>
                             </tr>
                         </tbody>
