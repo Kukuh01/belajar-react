@@ -1,16 +1,21 @@
 import Input from "./Input";
 import Label from "./Label";
+import { forwardRef } from "react";
 
-function InputForm(props){
+const InputForm = forwardRef(
+    
+    function InputForm(props, ref){
+    
+        const { label , name , type , placeholder} = props;
+    
+        return (
+            <div className='mb-6'>
+                <Label htmlFor={name}>{label}</Label>
+                <Input name={name} type={type} placeholder={placeholder} ref={ref}/>
+            </div>
+        );
+    }
 
-    const { label , name , type , placeholder} = props;
-
-    return (
-        <div className='mb-6'>
-            <Label htmlFor={name}>{label}</Label>
-            <Input name={name} type={type} placeholder={placeholder}/>
-        </div>
-    );
-}
+)
 
 export default InputForm;
