@@ -1,124 +1,229 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Button from "../components/Elements/Button/Button";
 import CardProduct from "../components/Fragments/CardProduct";
 
-// Rendering lists: Untuk merender banyak element sekaligus seperti looping
+/**
+ * DATA PRODUK (static)
+ * List produk yang akan dirender pada halaman.
+ * Masing-masing produk memiliki id, nama, harga, gambar, dan deskripsi.
+ */
 const products = [
     {
         id: 1,
         name: "Sepatu Baru",
         price: 1000000,
         image: "/images/vivobook.jpeg",
-        description: `Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quis officia dignissimos ipsa ullam accusantium libero aperiam enim incidunt voluptatem laudantium beatae aut cum nisi perspiciatis itaque sequi inventore, delectus deleniti!.`
+        description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
     },
     {
         id: 2,
         name: "Sepatu Baru 2",
         price: 1000000,
         image: "/images/vivobook.jpeg",
-        description: `Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quis officia dignissimos ipsa ullam accusantium libero`
+        description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
     },
     {
         id: 3,
-        name: "Sepatu Baru 2",
+        name: "Sepatu Baru 3",
         price: 1000000,
         image: "/images/vivobook.jpeg",
-        description: `Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quis officia dignissimos ipsa ullam accusantium libero`
+        description: `Lorem ipsum dolor sit amet consectetur adipisicing elit...`
     },
-]
+];
 
-// Menerima json dari form login
+/**
+ * Mengambil email user dari localStorage
+ */
 const email = localStorage.getItem("email");
 
 
 function ProductsPage() {
 
-    const [cart, setCart] = useState([
-        {
-            id: 1,
-            qty: 1,
+    /**
+     * STATE: cart
+     * Menyimpan daftar item yang ditambahkan ke keranjang, format:
+     * [
+     *    { id: 1, qty: 2 },
+     *    { id: 2, qty: 1 }
+     * ]
+     */
+    const [cart, setCart] = useState([]);
+
+    /**
+     * STATE: totalPrice
+     * Menyimpan total harga semua item dalam cart.
+     */
+    const [totalPrice, setTotalPrice] = useState(0);
+
+
+    /**
+     * USE EFFECT 1 – Component Did Mount
+     * Dijalankan HANYA saat komponen pertama kali dirender.
+     *
+     * Tujuan:
+     * - Mengambil cart dari localStorage agar cart tetap tersimpan meski halaman di-refresh.
+     */
+    useEffect(function () {
+        setCart(
+            JSON.parse(localStorage.getItem("cart")) || []
+        );
+    }, []); // dependency kosong = hanya sekali jalan
+
+
+    /**
+     * USE EFFECT 2 – Component Did Update (ketika 'cart' berubah)
+     *
+     * Fungsi:
+     * 1. Menghitung total harga (qty * price).
+     * 2. Menyimpan cart terbaru ke localStorage agar cart tidak hilang saat refresh.
+     */
+    useEffect(function () {
+        if (cart.length > 0) {
+
+            // Hitung total harga dengan reduce
+            const sum = cart.reduce(function (acc, item) {
+
+                // Cari produk berdasarkan id item
+                const product = products.find((product) => product.id === item.id);
+
+                // Accumulate total
+                return acc + product.price * item.qty;
+            }, 0);
+
+            // Update state total harga
+            setTotalPrice(sum);
+
+            // Simpan cart ke localStorage
+            localStorage.setItem("cart", JSON.stringify(cart));
         }
-    ]);
 
-    //Handle logout
+    }, [cart]); // hanya berjalan jika cart berubah
+
+
+    /**
+     * FUNCTION: handleLogout
+     * Menghapus data login dari localStorage dan redirect ke halaman login.
+     */
     function handleLogout() {
-
-        //Removew localstorage
         localStorage.removeItem("email");
         localStorage.removeItem("password");
-
         window.location.href = "/login";
     }
 
-    //Handle add to cart
-    function handleAddToCart(id){
-        if(cart.find(item => item.id === id)){
+
+    /**
+     * FUNCTION: handleAddToCart
+     * Menambah item ke cart. Logika:
+     * 1. Jika item sudah ada → tambahkan qty.
+     * 2. Jika belum ada → tambahkan item baru dengan qty = 1.
+     *
+     * @param {number} id — id produk yang ditambahkan
+     */
+    function handleAddToCart(id) {
+
+        // Jika item sudah ada dalam cart
+        if (cart.find(item => item.id === id)) {
+
+            // Update qty item tersebut
             setCart(
-                cart.map(item => item.id === id ?{...item, qty: item.qty + 1} : item)
-            )
+                cart.map(item =>
+                    item.id === id
+                        ? { ...item, qty: item.qty + 1 } // qty bertambah
+                        : item
+                )
+            );
+
         } else {
+
+            // Jika item belum ada → tambahkan item baru
             setCart([
-                ...cart, {
+                ...cart,
+                {
                     id,
-                    qty: 1,
+                    qty: 1
                 }
-            ])
+            ]);
         }
-        // setCart([
-        //     //Seperate operator
-        //     ...cart, {
-        //         id,
-        //         qty: 1,
-        //     } 
-        // ])
     }
+
 
     return (
         <Fragment>
-        <div className="flex h-20 bg-blue-600 justify-end text-white items-center px-10">{email}
-            <Button className="ml-5" variant="ml-5 bg-red-600" type="button" text="logout" onClick={handleLogout}/>
-        </div>
-        <div className="flex justify-center">
-        <div className="w-4/6 flex flex-wrap">
-            {products.map((product) => (
+            {/* BAGIAN HEADER */}
+            <div className="flex h-20 bg-blue-600 justify-end text-white items-center px-10">
+                {email}
+                <Button
+                    className="ml-5"
+                    variant="ml-5 bg-red-600"
+                    type="button"
+                    text="logout"
+                    onClick={handleLogout}
+                />
+            </div>
 
-            <CardProduct key={product.id}>
-                <CardProduct.Header image={product.image}/>
-                <CardProduct.Body title={product.name}>
-                    {product.description}
-                </CardProduct.Body>
-                <CardProduct.Footer id={product.id} price={product.price} handleAddToCart={handleAddToCart}/>
-            </CardProduct>
-                
-            ))}
-        </div>
-        <div className="w-2/6">
-            <h1 className="text-3xl font-bold text-blue-600 ml-5 mb-2">Cart</h1>
-            <table className="text-left table-auto border-separate border-spacing-x-5">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {cart.map((item) => {
-                        const product = products.find((product) => product.id === item.id);
-                        return (
-                            <tr key={item.id}>
-                                <td>{product.name}</td>
-                                <td>Rp{" "} {product.price.toLocaleString('id-ID',{styles: 'currency', currency: 'IDR'})}</td>
-                                <td>{item.qty}</td>
-                                <td>Rp {(item.qty * product.price).toLocaleString('id-ID',{styles: 'currency', currency: 'IDR'})}</td>
+            {/* BAGIAN BODY */}
+            <div className="flex justify-center">
+
+                {/* LIST PRODUK */}
+                <div className="w-4/6 flex flex-wrap">
+                    {products.map((product) => (
+
+                        <CardProduct key={product.id}>
+                            <CardProduct.Header image={product.image} />
+                            <CardProduct.Body title={product.name}>
+                                {product.description}
+                            </CardProduct.Body>
+                            <CardProduct.Footer
+                                id={product.id}
+                                price={product.price}
+                                handleAddToCart={handleAddToCart}
+                            />
+                        </CardProduct>
+
+                    ))}
+                </div>
+
+                {/* BAGIAN CART */}
+                <div className="w-2/6">
+                    <h1 className="text-3xl font-bold text-blue-600 ml-5 mb-2">Cart</h1>
+
+                    <table className="text-left table-auto border-separate border-spacing-x-5">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
                             </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-        </div>
-        </div>
+                        </thead>
+
+                        <tbody>
+                            {cart.map((item) => {
+
+                                // Cari data product berdasarkan id item
+                                const product = products.find((product) => product.id === item.id);
+
+                                return (
+                                    <tr key={item.id}>
+                                        <td>{product.name}</td>
+                                        <td>{product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                                        <td>{item.qty}</td>
+                                        <td>{(item.qty * product.price).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                                    </tr>
+                                );
+                            })}
+
+                            <tr>
+                                <td colSpan={3}><b>Total Price</b></td>
+                                <td>
+                                    <b>{totalPrice.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</b>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
         </Fragment>
     );
 }
