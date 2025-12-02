@@ -58,7 +58,9 @@ function ProductsPage() {
 
     const [products, setProducts] = useState([]);
 
-
+    /**
+     * Use effect component did mount untuk get API
+     */
     useEffect(function(){
         getProducts(function(data){
             setProducts(data)
