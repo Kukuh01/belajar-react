@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import Button from "../components/Elements/Button/Button";
 import CardProduct from "../components/Fragments/CardProduct";
 import { getProducts } from "../services/product.service";
+import { getUsername } from "../services/auth.service";
 
 /**
  * DATA PRODUK (static)
@@ -35,7 +36,7 @@ import { getProducts } from "../services/product.service";
 /**
  * Mengambil email user dari localStorage
  */
-const email = localStorage.getItem("email");
+
 
 
 function ProductsPage() {
@@ -58,6 +59,8 @@ function ProductsPage() {
 
     const [products, setProducts] = useState([]);
 
+    const [username, setUsername] = useState("");
+
     /**
      * Use effect component did mount untuk get API
      */
@@ -75,10 +78,20 @@ function ProductsPage() {
      * - Mengambil cart dari localStorage agar cart tetap tersimpan meski halaman di-refresh.
      */
     useEffect(function () {
+        const token = localStorage.getItem("token");
+        if(token){
+            setUsername(getUsername(token));
+        }
+        else {
+            window.location.href = "/login";
+        }
+
         setCart(
             JSON.parse(localStorage.getItem("cart")) || []
         );
+
     }, []); // dependency kosong = hanya sekali jalan
+
 
 
     /**
@@ -116,7 +129,7 @@ function ProductsPage() {
      * Menghapus data login dari localStorage dan redirect ke halaman login.
      */
     function handleLogout() {
-        localStorage.removeItem("email");
+        localStorage.removeItem("token");
         localStorage.removeItem("password");
         window.location.href = "/login";
     }
@@ -184,7 +197,7 @@ function ProductsPage() {
         <Fragment>
             {/* BAGIAN HEADER */}
             <div className="flex h-20 bg-blue-600 justify-end text-white items-center px-10">
-                {email}
+                {username}
                 <Button
                     className="ml-5"
                     variant="ml-5 bg-red-600"
