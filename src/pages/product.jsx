@@ -3,6 +3,7 @@ import Button from "../components/Elements/Button/Button";
 import CardProduct from "../components/Fragments/CardProduct";
 import { getProducts } from "../services/product.service";
 import { getUsername } from "../services/auth.service";
+import { useLogin } from "../hooks/useLogin";
 
 /**
  * DATA PRODUK (static)
@@ -59,7 +60,7 @@ function ProductsPage() {
 
     const [products, setProducts] = useState([]);
 
-    const [username, setUsername] = useState("");
+    const username = useLogin();
 
     /**
      * Use effect component did mount untuk get API
@@ -78,18 +79,9 @@ function ProductsPage() {
      * - Mengambil cart dari localStorage agar cart tetap tersimpan meski halaman di-refresh.
      */
     useEffect(function () {
-        const token = localStorage.getItem("token");
-        if(token){
-            setUsername(getUsername(token));
-        }
-        else {
-            window.location.href = "/login";
-        }
-
         setCart(
             JSON.parse(localStorage.getItem("cart")) || []
         );
-
     }, []); // dependency kosong = hanya sekali jalan
 
 
